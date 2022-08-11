@@ -1,0 +1,108 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="card">
+    <div class="card-header">
+        {{ page.title }}
+    </div>
+    <div class="card-body">
+        <div id="divAlert" class="d-none" role="alert">
+          <small id="textDivAlert"></small>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-bordered table-hover display text-center align-middle" style="width:100%">
+                <thead class="bg-light">
+                    <tr>
+                        <th>NOMBRE</th>
+                        <th>APELLIDO</th>
+                        <th>EMAIL</th>
+                        <th style="width: 50px;">ADMINISTRADOR</th>
+                        <th style="width: 150px;"></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for person in people %}
+                    <tr id="tr_{{ person.id }}">
+                        <td>
+                            {{ person.first_name }}
+                        </td>
+                        <td>
+                            {{ person.last_name }}
+                        </td>
+                        <td>
+                            {{ person.email }}
+                        </td>
+                        <td>
+                            {% if person.is_admin %}
+                            Si
+                            {% else %}
+                            No
+                            {% endif %}
+                        </td>
+                        <td>
+                            <a
+                                role="button"
+                                class="btn btn-sm btn-primary"
+                                href="/people/edit/{{ person.id }}">
+                                Editar
+                            </a>
+                            <a
+                                role="button"
+                                id="{{ people.id }}"
+                                class="btn btn-sm btn-danger delete">
+                                Eliminar
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div class="card-footer">
+        <a
+            role="button"
+            class="btn btn-sm btn-primary"
+            href="/people/add">
+            Nuevo Registro
+        </a>
+    </div>
+</div>
+<script type="text/javascript">
+    // * * * * ACTIVE * * * * 
+    let menuPeople = document.getElementById("menuPeople");
+    menuPeople.classList.add("active");
+
+    // * * * * DELETE * * * * 
+    let buttons = document.querySelectorAll(".delete");
+    for (let button of buttons) {
+        button.addEventListener("click", function(e) {
+            let id = Number(e.target.id);
+            fetch("/people/delete/"+id, {
+                method: "DELETE"
+            }).then(function(response) {
+                return response.json();
+            }).then(function(result) {
+                let response = result
+                let buttonAlert = document.getElementById("divAlert");
+                let textButtonAlert = document.getElementById("textDivAlert");
+                buttonAlert.removeAttribute("class");
+                buttonAlert.classList.add("alert", "alert-"+response.status);
+                textButtonAlert.textContent = response.message;
+                if(response.status == "success"){
+                    let trElement = document.getElementById("tr_"+id);
+                    trElement.remove();
+                };
+                function removeAlertFunction() {
+                    let buttonAlert = document.getElementById("divAlert");
+                    let textButtonAlert = document.getElementById("textDivAlert");
+                    buttonAlert.removeAttribute("class");
+                    textButtonAlert.textContent = " ";
+                };
+                setTimeout(removeAlertFunction, 2000);
+            }).catch(function(err) {
+                console.log(err);
+            });
+        });
+    };
+</script>
+{% endblock %}

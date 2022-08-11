@@ -1,0 +1,22 @@
+/*For Alert*/
+div.alert {
+    padding: 5px;
+    text-align: center;
+}
+
+/*For link in relations*/
+a.relation:link{
+    color: gray;
+    text-decoration: none;
+}
+
+a.relation:hover{
+    color: blue;
+    font-weight: bold;
+}
+
+/*For buttom token*/
+a.token{
+    margin: 25px;
+    margin-left: 0px;
+}

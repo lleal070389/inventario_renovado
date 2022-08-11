@@ -1,0 +1,172 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="card">
+    <div class="card-header">
+        {{ page.title }}
+    </div>
+    <div class="card-body">
+        <div id="divAlert" class="d-none" role="alert">
+          <small id="textDivAlert"></small>
+        </div>
+        <form id="formPerson">
+            <div class="row mb-3">
+                <div class="col-4">
+                    <h6 class="text-muted">Nombre</h6>
+                    <input 
+                        type="text"
+                        name="first_name"
+                        id="first_name"
+                        class="form-control form-control-sm" 
+                        placeholder=""
+                        maxlength="60"
+                        {% if person %}
+                        value="{{ person.first_name }}"
+                        {% else %}
+                        value=""
+                        {% endif %}
+                        required>
+                </div>
+                <div class="col-4">
+                    <h6 class="text-muted">APELLIDO</h6>
+                    <input 
+                        type="text"
+                        name="last_name"
+                        id="last_name"
+                        class="form-control form-control-sm" 
+                        placeholder=""
+                        maxlength="60"
+                        {% if person %}
+                        value="{{ person.last_name }}"
+                        {% else %}
+                        value=""
+                        {% endif %}>
+                </div>
+                <div class="col-4">
+                    <h6 class="text-muted">ADMINISTRADOR</h6>
+                    <select 
+                        type="text"
+                        name="is_admin" 
+                        id="is_admin"
+                        class="form-control form-control-sm"
+                        placeholder="">
+                        {% if person %}
+                        {% if person.is_admin %}
+                        <option value="1" selected>SI</option>
+                        <option value="0">NO</option>
+                        {% else %}
+                        <option value="1">SI</option>
+                        <option value="0" selected>NO</option>
+                        {% endif %}
+                        {% else %}
+                        <option value="1">SI</option>
+                        <option value="0" selected>NO</option>
+                        {% endif %}
+                    </select>
+                </div>
+            </div>
+            <div class="row mb-3">
+                <div class="col-4">
+                    <h6 class="text-muted">Password</h6>
+                    <input 
+                        type="text"
+                        name="password"
+                        id="password"
+                        class="form-control form-control-sm" 
+                        placeholder=""
+                        maxlength="80"
+                        {% if person %}
+                        value="{{ person.password }}"
+                        {% else %}
+                        value=""
+                        {% endif %}
+                        required>
+                </div>
+                <div class="col-4">
+                    <h6 class="text-muted">Email</h6>
+                    <input 
+                        type="email"
+                        name="email"
+                        id="email"
+                        class="form-control form-control-sm" 
+                        placeholder=""
+                        maxlength="60"
+                        {% if person %}
+                        value="{{ person.email }}"
+                        {% else %}
+                        value=""
+                        {% endif %}
+                        required>
+                </div>
+
+                {% if person %}
+                <div class="col-2">
+                    <h6 class="text-muted">Fecha de creación</h6>
+                    <input 
+                        class="form-control form-control-sm" 
+                        value="{{ person._create_time() }}"
+                        disabled>
+                </div>
+                {% if person.update_time %}
+                <div class="col-2">
+                    <h6 class="text-muted">Fecha de actualización</h6>
+                    <input 
+                        class="form-control form-control-sm" 
+                        value="{{ person._update_time() }}"
+                        disabled>
+                </div>
+                {% endif %}
+                {% endif %}
+
+            </div>
+        </form>
+    </div>
+    <div class="card-footer">
+        <a
+            role="button"
+            class="btn btn-sm btn-secondary"
+            href="/people">
+            Volver
+        </a>
+        <button
+            type="submit"
+            class="btn btn-sm btn-primary"
+            form="formPerson">
+            Guardar Cambios
+        </button>
+    </div>
+</div>
+<script type="text/javascript">
+    // * * * * ACTIVE * * * * 
+    let menuPeople = document.getElementById("menuPeople");
+    menuPeople.classList.add("active");
+
+    // * * * * ADD & EDIT * * * * 
+    let formPerson = document.getElementById("formPerson");
+    formPerson.addEventListener("submit", function(e){
+        e.preventDefault();
+        let formData = new FormData(this);
+        fetch({% if person %} "/people/edit/{{ person.id }}" {% else %} "/people/add" {% endif %}, {
+            method: "POST",
+            body: formData
+        }).then(function(response) {
+            return response.json();
+        }).then(function(result) {
+            let response = result;
+            let buttonAlert = document.getElementById("divAlert");
+            let textButtonAlert = document.getElementById("textDivAlert");
+            buttonAlert.removeAttribute("class");
+            buttonAlert.classList.add("alert", "alert-"+response.status);
+            textButtonAlert.textContent = response.message;
+            function removeAlertFunction() {
+                let buttonAlert = document.getElementById("divAlert");
+                let textButtonAlert = document.getElementById("textDivAlert");
+                buttonAlert.removeAttribute("class");
+                textButtonAlert.textContent = "";
+            };
+            setTimeout(removeAlertFunction, 2000);
+        }).catch(function(err) {
+            console.log(err);
+        });
+    });
+</script>
+{% endblock %}

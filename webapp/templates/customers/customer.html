@@ -1,0 +1,124 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="card">
+    <div class="card-header">
+        {{ page.title }}
+    </div>
+    <div class="card-body">
+        <div id="divAlert" class="d-none" role="alert">
+          <small id="textDivAlert"></small>
+        </div>
+        <form id="formCustomer">
+            <div class="row mb-3">
+                <div class="col-4">
+                    <h6 class="text-muted">Nombre</h6>
+                    <input 
+                        type="text"
+                        name="name"
+                        id="name"
+                        class="form-control form-control-sm" 
+                        placeholder=""
+                        maxlength="60"
+                        {% if customer %}
+                        value="{{ customer.name }}"
+                        {% else %}
+                        value=""
+                        {% endif %}
+                        required>
+                </div>
+                <div class="col-4">
+                    <h6 class="text-muted">TOKEN</h6>
+                    <input 
+                        type="text"
+                        name="token"
+                        id="token"
+                        class="form-control form-control-sm" 
+                        placeholder=""
+                        maxlength="45"
+                        {% if customer %}
+                        value="{{ customer.token }}"
+                        {% else %}
+                        value="{{ token }}"
+                        {% endif %}
+                        required>
+                </div>
+                <div class="col-4">
+                    <a
+                        role="button"
+                        id="uptadateToken"
+                        class="btn btn-sm btn-primary token">
+                        Nuevo token
+                    </a>
+                </div>
+            </div>
+        </form>
+    </div>
+    <div class="card-footer">
+        <a
+            role="button"
+            class="btn btn-sm btn-secondary"
+            href="/customers">
+            Volver
+        </a>
+        <button
+            type="submit"
+            class="btn btn-sm btn-primary"
+            form="formCustomer">
+            Guardar Cambios
+        </button>
+    </div>
+</div>
+<script type="text/javascript">
+    // * * * * ACTIVE * * * * 
+    let menuCustomers = document.getElementById("menuCustomers");
+    menuCustomers.classList.add("active");
+
+    // * * * * MAKE NEW TOKEN  * * * * 
+    function create_UUID(){
+        let dt = new Date().getTime();
+        let uuid = "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, function(c) {
+            let r = (dt + Math.random()*16)%16 | 0;
+            dt = Math.floor(dt/16);
+            return (c == "x" ? r :(r&0x3|0x8)).toString(16);
+        });
+        return uuid;
+    };
+
+    // * * * * UPDATE TOKEN FOR ADD & EDIT * * * * 
+    let uptadateToken = document.getElementById("uptadateToken");
+    uptadateToken.addEventListener("click", function(e){
+        _updateToken = create_UUID();
+        let token = document.getElementById("token");
+        token.value = _updateToken;
+    });
+
+    // * * * * ADD & EDIT * * * * 
+    let formCustomer = document.getElementById("formCustomer");
+    formCustomer.addEventListener("submit", function(e){
+        e.preventDefault();
+        let formData = new FormData(this);
+        fetch({% if customer %} "/customers/edit/{{ customer.id }}" {% else %} "/customers/add" {% endif %}, {
+            method: "POST",
+            body: formData
+        }).then(function(response) {
+            return response.json();
+        }).then(function(result) {
+            let response = result;
+            let buttonAlert = document.getElementById("divAlert");
+            let textButtonAlert = document.getElementById("textDivAlert");
+            buttonAlert.removeAttribute("class");
+            buttonAlert.classList.add("alert", "alert-"+response.status);
+            textButtonAlert.textContent = response.message;
+            function removeAlertFunction() {
+                let buttonAlert = document.getElementById("divAlert");
+                let textButtonAlert = document.getElementById("textDivAlert");
+                buttonAlert.removeAttribute("class");
+                textButtonAlert.textContent = "";
+            };
+            setTimeout(removeAlertFunction, 2000);
+        }).catch(function(err) {
+            console.log(err);
+        });
+    });
+</script>
+{% endblock %}
